@@ -1,6 +1,6 @@
-FROM alpine:3.23
+FROM alpine:3.24
 LABEL Maintainer="Mathieu LESNIAK <mathieu@lesniak.fr>"\
-    Description="Lightweight container with Nginx 1.28 & PHP-FPM 8.5 based on Alpine Linux. Full locales enabled"
+    Description="Lightweight container with Nginx 1.30 & PHP-FPM 8.5 based on Alpine Linux. Full locales enabled"
 
 ENV MUSL_LOCPATH="/usr/share/i18n/locales/musl"
 
@@ -35,9 +35,9 @@ RUN { \
     echo 'opcache.max_wasted_percentage=5;' \
     echo 'opcache.revalidate_freq=120'; \
     echo 'opcache.fast_shutdown=1'; \
-    echo 'opcache.enable_cli=0'; \ 
+    echo 'opcache.enable_cli=0'; \
     echo 'opcache.jit_buffer_size=64M'; \
-    echo 'opcache.jit=tracing';\ 
+    echo 'opcache.jit=tracing';\
     } > /etc/php85/conf.d/opcache-recommended.ini
 
 # limits settings
@@ -48,10 +48,14 @@ RUN { \
     echo "date.timezone='Europe/Paris'"; \
     } > /etc/php85/conf.d/limits.ini
 
+# security settings
+RUN { \
+    echo 'session.upload_progress.enabled = Off'; \
+} > /etc/php85/conf.d/security.ini
+
 RUN sed -i "s/nginx:x:100:101:nginx:\/var\/lib\/nginx:\/sbin\/nologin/nginx:x:100:101:nginx:\/usr:\/bin\/bash/g" /etc/passwd && \
     sed -i "s/nginx:x:100:101:nginx:\/var\/lib\/nginx:\/sbin\/nologin/nginx:x:100:101:nginx:\/usr:\/bin\/bash/g" /etc/passwd- && \
-    ln -s /sbin/php-fpm85 /sbin/php-fpm && \
-    ln -s /usr/bin/php85 /usr/bin/php
+    ln -s /sbin/php-fpm85 /sbin/php-fpm
 
 # Composer
 RUN cd /tmp/ && \
@@ -77,4 +81,3 @@ EXPOSE 80
 HEALTHCHECK --timeout=3s CMD curl --silent --fail http://127.0.0.1:80/fpm-ping
 
 ENTRYPOINT ["sh", "/etc/entrypoint.sh"]
-
