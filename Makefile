@@ -16,5 +16,4 @@ push: ## Push to docker registry
 	docker push ${REGISTRY_NAME}
 
 build-and-push-multi: ## Build amd64 and arm64 images
-	docker buildx build --rm  --platform linux/amd64,linux/arm64 -t ${REGISTRY_NAME}:${VERSION} --push .
-
+	docker buildx build --rm --no-cache --platform linux/amd64,linux/arm64 -t ${REGISTRY_NAME}:${VERSION} --push .
